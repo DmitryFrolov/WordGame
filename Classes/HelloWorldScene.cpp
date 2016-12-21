@@ -1,11 +1,5 @@
 #include "HelloWorldScene.h"
 //#include "SimpleAudioEngine.h"
-USING_NS_CC;
-
-#define LABEL_FONTNAME "fonts/Marker Felt.ttf"
-#define LABEL_FONTSIZE 24
-#define SCORE_LABEL_FONTSIZE 15
-#define SCORE_STEP 10
 
 Scene* HelloWorld::createScene()
 {
@@ -21,9 +15,9 @@ bool HelloWorld::init()
 	{
 		return false;
 	}
-	numOfHealth = maxHealth;
 	visibleSize = Director::getInstance()->getVisibleSize();
 	origin = Director::getInstance()->getVisibleOrigin();
+	newGame();
 
 	auto closeItem = MenuItemImage::create("CloseNormal.png", "CloseSelected.png", CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
 	closeItem->setPosition(Vec2(origin.x + visibleSize.width - closeItem->getContentSize().width / 2, origin.y + closeItem->getContentSize().height / 2));
@@ -34,8 +28,6 @@ bool HelloWorld::init()
 	Vec2 scorePosition = Vec2(origin.x + visibleSize.width * 9 / 10, origin.y + visibleSize.height * 9.3 / 10);
 	Label *scoreLabel = CreateTextLabel("Score:", LABEL_FONTNAME, LABEL_FONTSIZE, scorePosition);
 	scorePtsLabel = CreateTextLabel("0", LABEL_FONTNAME, LABEL_FONTSIZE, scorePosition + Vec2(47, 0));
-	
-	drawHealth();
 
 	Vec2 taskPos = Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height - 20);
 	taskLabel = CreateTextLabel("Hi", LABEL_FONTNAME, LABEL_FONTSIZE, taskPos);
@@ -46,12 +38,12 @@ bool HelloWorld::init()
 	auto listener = EventListenerKeyboard::create();
 	listener->onKeyPressed = CC_CALLBACK_2(HelloWorld::onKeyPressed, this); 
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
- 
+	drawHealth();
+	
 	tm.init();
 	task = tm.getRandTask();
 	taskLabel->setString(task.getTask());
 }
-
 
 void HelloWorld::ShowAnswer()
 {
@@ -72,8 +64,7 @@ void HelloWorld::onKeyPressed(EventKeyboard::KeyCode keyCode, Event *event)
 	}
 	else
 	{
-		numOfHealth--;
-		
+		numOfHealth--;	
 		updateHealth();
 	}
 	
@@ -103,10 +94,11 @@ void HelloWorld::drawHealth()
 
 void HelloWorld::updateHealth()
 {
-	if (numOfHealth < 1) //todo: экран поражения вместо выхода
-		exit(0);
+	if (numOfHealth < 1) {
+		scheduleOnce(schedule_selector(HelloWorld::showEnd), 0);
+	}
 	for (int i = maxHealth-1; i >= numOfHealth; i--)
-		icons[i]->setOpacity(0);
+		icons[i]->setOpacity(1);
 }
 
 Label *HelloWorld::CreateTextLabel(char *text, char *ff, int fsize, Vec2 pos)
@@ -151,4 +143,43 @@ void HelloWorld::setScore(int s)
 {
 	score = s;
 	scorePtsLabel->setString(std::to_string(score));
+}
+
+void HelloWorld::createEndScene()
+{
+	endScene = Scene::create();
+
+	Label *lbEnd = Label::createWithTTF("End", LABEL_FONTNAME, 3 * LABEL_FONTSIZE);
+	Vec2 pos = Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 + 60);
+	lbEnd->setPosition(pos);
+	endScene->addChild(lbEnd);
+
+	auto replayItem = MenuItemImage::create("replayNormal.png", "replayNormal.png", CC_CALLBACK_1(HelloWorld::menuReplayCallback, this));
+	replayItem->setPosition(Vec2(pos.x, pos.y-lbEnd->getContentSize().height-10));
+	
+	auto menu = Menu::create(replayItem, NULL);
+	menu->setPosition(Vec2::ZERO);
+	endScene->addChild(menu, 1);
+}
+
+void HelloWorld::showEnd(float dt)
+{
+	createEndScene();
+	Director::getInstance()->pushScene(endScene);
+	newGame();
+}
+
+void HelloWorld::menuReplayCallback(cocos2d::Ref* pSender) //call game scene
+{
+	Director::getInstance()->popScene();
+	setScore(0);
+	updateTask(0);
+
+	for (int i = 0; i < maxHealth; i++)
+		icons[i]->setOpacity(255);
+}
+
+void HelloWorld::newGame()
+{
+	numOfHealth = maxHealth;
 }
