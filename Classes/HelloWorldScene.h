@@ -40,10 +40,10 @@ public:
 	void onKeyPressed(EventKeyboard::KeyCode keyCode, Event *event);
 	void drawHealth();
 	void updateHealth();
-
+	void onKeyPressedEndScene(EventKeyboard::KeyCode keyCode, Event *event);
 	void addScore(int s);
 	void setScore(int s);
-	
+	void checkDownScreenCollision(float dt);
 	void newGame();
 	void ShowAnswer();
 	void createEndScene();

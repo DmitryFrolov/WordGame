@@ -31,18 +31,29 @@ bool HelloWorld::init()
 
 	Vec2 taskPos = Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height - 20);
 	taskLabel = CreateTextLabel("Hi", LABEL_FONTNAME, LABEL_FONTSIZE, taskPos);
-
-	Vec2 taskMoveTo = origin + Vec2(visibleSize.width / 2, -visibleSize.height / 4);
+	taskLabel->setAnchorPoint(Vec2(0.5, 1));
+	Vec2 taskMoveTo = origin + Vec2(visibleSize.width / 2, 0);
 	MoveObject((Sprite*)taskLabel, taskMoveTo, Vec2(3, 3));
 	
 	auto listener = EventListenerKeyboard::create();
 	listener->onKeyPressed = CC_CALLBACK_2(HelloWorld::onKeyPressed, this); 
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
-	drawHealth();
 	
+	drawHealth();
+
 	tm.init();
 	task = tm.getRandTask();
 	taskLabel->setString(task.getTask());
+	schedule(schedule_selector(HelloWorld::checkDownScreenCollision), 0); //костыль?
+}
+
+void HelloWorld::checkDownScreenCollision(float dt)
+{
+	if (taskLabel->getPositionY() <= 0) {
+		numOfHealth--;
+		updateHealth();
+		updateTask(0);
+	}
 }
 
 void HelloWorld::ShowAnswer()
@@ -67,7 +78,6 @@ void HelloWorld::onKeyPressed(EventKeyboard::KeyCode keyCode, Event *event)
 		numOfHealth--;	
 		updateHealth();
 	}
-	
 }
 
 void HelloWorld::MoveObject(Sprite *obj, Vec2 moveto, Vec2 scaleby)
@@ -119,6 +129,7 @@ void HelloWorld::updateTask(float dt)
 	task = tm.getRandTask();
 	taskLabel->setString(task.getTask());
 	initPosMove();
+	schedule(schedule_selector(HelloWorld::checkDownScreenCollision), 0);    //костыль
 }
 
 void HelloWorld::initPosMove()
@@ -130,7 +141,7 @@ void HelloWorld::initPosMove()
 	taskLabel->setPosition(taskPos);
 	taskLabel->setScale(1);
 
-	Vec2 taskMoveTo = origin + Vec2(visibleSize.width / 2, -visibleSize.height / 4);
+	Vec2 taskMoveTo = origin + Vec2(visibleSize.width / 2, 0);
 	MoveObject((Sprite*)taskLabel, taskMoveTo, Vec2(3, 3));
 }
 
@@ -160,6 +171,11 @@ void HelloWorld::createEndScene()
 	auto menu = Menu::create(replayItem, NULL);
 	menu->setPosition(Vec2::ZERO);
 	endScene->addChild(menu, 1);
+
+	auto listener = EventListenerKeyboard::create();
+	listener->onKeyPressed = CC_CALLBACK_2(HelloWorld::onKeyPressedEndScene, this);
+	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+
 }
 
 void HelloWorld::showEnd(float dt)
@@ -174,7 +190,6 @@ void HelloWorld::menuReplayCallback(cocos2d::Ref* pSender) //call game scene
 	Director::getInstance()->popScene();
 	setScore(0);
 	updateTask(0);
-
 	for (int i = 0; i < maxHealth; i++)
 		icons[i]->setOpacity(255);
 }
@@ -182,4 +197,20 @@ void HelloWorld::menuReplayCallback(cocos2d::Ref* pSender) //call game scene
 void HelloWorld::newGame()
 {
 	numOfHealth = maxHealth;
+}
+
+void HelloWorld::onKeyPressedEndScene(EventKeyboard::KeyCode keyCode, Event *event)
+{
+	if (EventKeyboard::KeyCode::KEY_ESCAPE == keyCode)
+	{
+		exit(0);
+	}
+	if (EventKeyboard::KeyCode::KEY_ENTER == keyCode)
+	{ //menuReplayCallback()
+		Director::getInstance()->popScene();
+		setScore(0);
+		updateTask(0);
+		for (int i = 0; i < maxHealth; i++)
+			icons[i]->setOpacity(255);
+	}
 }
