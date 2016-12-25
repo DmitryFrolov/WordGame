@@ -1,5 +1,4 @@
 #include "HelloWorldScene.h"
-//#include "SimpleAudioEngine.h"
 
 Scene* HelloWorld::createScene()
 {
@@ -18,7 +17,7 @@ bool HelloWorld::init()
 	visibleSize = Director::getInstance()->getVisibleSize();
 	origin = Director::getInstance()->getVisibleOrigin();
 	newGame();
-
+	addBackgroundAudio();
 	auto closeItem = MenuItemImage::create("CloseNormal.png", "CloseSelected.png", CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
 	closeItem->setPosition(Vec2(origin.x + visibleSize.width - closeItem->getContentSize().width / 2, origin.y + closeItem->getContentSize().height / 2));
 
@@ -28,6 +27,8 @@ bool HelloWorld::init()
 	Vec2 scorePosition = Vec2(origin.x + visibleSize.width * 9 / 10, origin.y + visibleSize.height * 9.3 / 10);
 	Label *scoreLabel = CreateTextLabel("Score:", LABEL_FONTNAME, LABEL_FONTSIZE, scorePosition);
 	scorePtsLabel = CreateTextLabel("0", LABEL_FONTNAME, LABEL_FONTSIZE, scorePosition + Vec2(47, 0));
+
+	createBackground();
 
 	Vec2 taskPos = Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height - 20);
 	taskLabel = CreateTextLabel("Hi", LABEL_FONTNAME, LABEL_FONTSIZE, taskPos);
@@ -45,12 +46,15 @@ bool HelloWorld::init()
 	task = tm.getRandTask();
 	taskLabel->setString(task.getTask());
 	schedule(schedule_selector(HelloWorld::checkDownScreenCollision), 0); //костыль?
+
+	return true;
 }
 
 void HelloWorld::checkDownScreenCollision(float dt)
 {
 	if (taskLabel->getPositionY() <= 0) {
-		numOfHealth--;
+		numOfHealth--;																					
+		CocosDenshion::SimpleAudioEngine::sharedEngine()->playEffect("life_lose.wav");
 		updateHealth();
 		updateTask(0);
 	}
@@ -65,18 +69,19 @@ void HelloWorld::ShowAnswer()
 void HelloWorld::onKeyPressed(EventKeyboard::KeyCode keyCode, Event *event)
 {
 	if (EventKeyboard::KeyCode::KEY_ESCAPE == keyCode) {
+		audio->end();
 		exit(0);
 	}
 	if (task.isKeyCorrect(keyCode))
 	{
+		CocosDenshion::SimpleAudioEngine::sharedEngine()->playEffect("tower_place.wav");
 		ShowAnswer();
 		addScore(SCORE_STEP);
 		scheduleOnce(schedule_selector(HelloWorld::updateTask), 0);
 	}
 	else
 	{
-		numOfHealth--;	
-		updateHealth();
+		widthdrawHealth();
 	}
 }
 
@@ -96,7 +101,7 @@ void HelloWorld::drawHealth()
 	{
 		icons.push_back(Sprite::create("heart.png"));
 		icons[i]->setPosition(defaultPosition);
-		icons[i]->setScale(0.15);
+		icons[i]->setScale((float)0.15);
 		this->addChild(icons[i], 0);
 		defaultPosition += Vec2(14, 0);
 	}
@@ -107,6 +112,7 @@ void HelloWorld::updateHealth()
 	if (numOfHealth < 1) {
 		scheduleOnce(schedule_selector(HelloWorld::showEnd), 0);
 	}
+
 	for (int i = maxHealth-1; i >= numOfHealth; i--)
 		icons[i]->setOpacity(1);
 }
@@ -121,6 +127,7 @@ Label *HelloWorld::CreateTextLabel(char *text, char *ff, int fsize, Vec2 pos)
 
 void HelloWorld::menuCloseCallback(Ref* pSender)
 {
+	audio->end();
 	Director::getInstance()->end();
 }
 
@@ -171,11 +178,6 @@ void HelloWorld::createEndScene()
 	auto menu = Menu::create(replayItem, NULL);
 	menu->setPosition(Vec2::ZERO);
 	endScene->addChild(menu, 1);
-
-	auto listener = EventListenerKeyboard::create();
-	listener->onKeyPressed = CC_CALLBACK_2(HelloWorld::onKeyPressedEndScene, this);
-	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
-
 }
 
 void HelloWorld::showEnd(float dt)
@@ -199,18 +201,22 @@ void HelloWorld::newGame()
 	numOfHealth = maxHealth;
 }
 
-void HelloWorld::onKeyPressedEndScene(EventKeyboard::KeyCode keyCode, Event *event)
+void HelloWorld::createBackground()
 {
-	if (EventKeyboard::KeyCode::KEY_ESCAPE == keyCode)
-	{
-		exit(0);
-	}
-	if (EventKeyboard::KeyCode::KEY_ENTER == keyCode)
-	{ //menuReplayCallback()
-		Director::getInstance()->popScene();
-		setScore(0);
-		updateTask(0);
-		for (int i = 0; i < maxHealth; i++)
-			icons[i]->setOpacity(255);
-	}
+	auto backgtoundImage = Sprite::create(BACKGROUND_NAME);
+	backgtoundImage->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+	this->addChild(backgtoundImage, -1);
+}
+
+void HelloWorld::addBackgroundAudio()
+{
+	audio = CocosDenshion::SimpleAudioEngine::getInstance();
+	audio->playBackgroundMusic("8bitDungeonLevel.mp3", true);
+}
+
+void HelloWorld::widthdrawHealth()
+{
+	numOfHealth--;
+	CocosDenshion::SimpleAudioEngine::sharedEngine()->playEffect("life_lose.wav");
+	updateHealth();
 }

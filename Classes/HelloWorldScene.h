@@ -4,14 +4,16 @@
 #include <iostream>
 #include <vector>
 #include "cocos2d.h"
+#include "SimpleAudioEngine.h"
 #include "Classes\WordTask.h"
 #include "Classes\TaskManager.h"
 using namespace cocos2d;
-
-#define LABEL_FONTNAME "fonts/Marker Felt.ttf"
-#define LABEL_FONTSIZE 24
-#define SCORE_LABEL_FONTSIZE 15
-#define SCORE_STEP 10
+using namespace CocosDenshion;
+#define BACKGROUND_NAME			"background.jpg"
+#define LABEL_FONTNAME			"fonts/Marker Felt.ttf"
+#define LABEL_FONTSIZE			24
+#define SCORE_LABEL_FONTSIZE	15
+#define SCORE_STEP				10
 
 class HelloWorld : public cocos2d::Layer
 {
@@ -29,7 +31,7 @@ private:
 	WordTask						 task;
 
 	Scene						*endScene;
-
+	SimpleAudioEngine			   *audio;
 	void			 updateTask(float dt);
 	void					initPosMove();
 public:
@@ -40,7 +42,6 @@ public:
 	void onKeyPressed(EventKeyboard::KeyCode keyCode, Event *event);
 	void drawHealth();
 	void updateHealth();
-	void onKeyPressedEndScene(EventKeyboard::KeyCode keyCode, Event *event);
 	void addScore(int s);
 	void setScore(int s);
 	void checkDownScreenCollision(float dt);
@@ -50,6 +51,9 @@ public:
 	void showEnd(float dt);
 	void menuCloseCallback(cocos2d::Ref* pSender);
 	void menuReplayCallback(cocos2d::Ref* pSender);
+	void createBackground();
+	void addBackgroundAudio(); 
+	void widthdrawHealth();
 	CREATE_FUNC(HelloWorld);
 };
 
