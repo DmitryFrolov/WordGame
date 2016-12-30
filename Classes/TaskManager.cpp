@@ -1,4 +1,17 @@
 #include "TaskManager.h"
+TaskManager::TaskManager()
+{
+	generator = new TaskGenerator();
+	generator->init();
+	listOfTasks = NULL;
+	numTasks = generator->getSize();
+}
+
+TaskManager::~TaskManager()
+{
+	delete[] listOfTasks;
+	listOfTasks = NULL;
+}
 
 void TaskManager::init()
 {
@@ -9,9 +22,10 @@ void TaskManager::init()
 
 	for (int i = 0; i < numTasks; i++)
 	{
-		listOfTasks[i].init(tasks[i], ans[i], key[i]);
+		//listOfTasks[i].init(tasks[i], ans[i], key[i]);
+		listOfTasks[i].init(generator->getTask(), generator->getAnswer(), generator->getKey());
+		generator->upgradeToRand();
 	}
-	srand(time(0));
 }
 
 int TaskManager::getNumTasks()

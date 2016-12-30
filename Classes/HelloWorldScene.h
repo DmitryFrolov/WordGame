@@ -22,10 +22,12 @@ private:
 	std::vector<Node*>				icons;
 	static const int		maxHealth = 5;
 	int						  numOfHealth;
-	
+	int								score;
+
+	Label						*ansLabel;
 	Label					   *taskLabel;
 	Label				   *scorePtsLabel;
-	int								score;
+	
 	Vec2						   origin;
 	Size					  visibleSize;
 	WordTask						 task;

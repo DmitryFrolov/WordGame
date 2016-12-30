@@ -31,11 +31,13 @@ bool HelloWorld::init()
 	createBackground();
 
 	Vec2 taskPos = Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height - 20);
-	taskLabel = CreateTextLabel("Hi", LABEL_FONTNAME, LABEL_FONTSIZE, taskPos);
+	taskLabel = CreateTextLabel("", LABEL_FONTNAME, LABEL_FONTSIZE, taskPos);
 	taskLabel->setAnchorPoint(Vec2(0.5, 1));
 	Vec2 taskMoveTo = origin + Vec2(visibleSize.width / 2, 0);
 	MoveObject((Sprite*)taskLabel, taskMoveTo, Vec2(3, 3));
 	
+	
+
 	auto listener = EventListenerKeyboard::create();
 	listener->onKeyPressed = CC_CALLBACK_2(HelloWorld::onKeyPressed, this); 
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
@@ -45,7 +47,8 @@ bool HelloWorld::init()
 	tm.init();
 	task = tm.getRandTask();
 	taskLabel->setString(task.getTask());
-	schedule(schedule_selector(HelloWorld::checkDownScreenCollision), 0); //костыль?
+	ansLabel = CreateTextLabel(task.getAnswer(), LABEL_FONTNAME, LABEL_FONTSIZE, Vec2(origin.x + 55, origin.y + visibleSize.height * 8.5 / 10));
+	schedule(schedule_selector(HelloWorld::checkDownScreenCollision), 0); 
 
 	return true;
 }
@@ -53,9 +56,7 @@ bool HelloWorld::init()
 void HelloWorld::checkDownScreenCollision(float dt)
 {
 	if (taskLabel->getPositionY() <= 0) {
-		numOfHealth--;																					
-		CocosDenshion::SimpleAudioEngine::sharedEngine()->playEffect("life_lose.wav");
-		updateHealth();
+		widthdrawHealth();
 		updateTask(0);
 	}
 }
@@ -136,7 +137,7 @@ void HelloWorld::updateTask(float dt)
 	task = tm.getRandTask();
 	taskLabel->setString(task.getTask());
 	initPosMove();
-	schedule(schedule_selector(HelloWorld::checkDownScreenCollision), 0);    //костыль
+	ansLabel->setString(task.getAnswer());
 }
 
 void HelloWorld::initPosMove()
