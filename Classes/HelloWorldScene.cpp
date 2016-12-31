@@ -156,6 +156,10 @@ void HelloWorld::initPosMove()
 void HelloWorld::addScore(int s)
 {
 	setScore(score + s);
+	if (score >= 200)
+	{
+		scheduleOnce(schedule_selector(HelloWorld::showWin), 0);
+	}
 }
 
 void HelloWorld::setScore(int s)
@@ -220,4 +224,28 @@ void HelloWorld::widthdrawHealth()
 	numOfHealth--;
 	CocosDenshion::SimpleAudioEngine::sharedEngine()->playEffect("life_lose.wav");
 	updateHealth();
+}
+
+//Win Scene things
+void HelloWorld::showWin(float dt) {
+	createWinScene();
+	Director::getInstance()->pushScene(winScene);
+	newGame();
+}
+
+void HelloWorld::createWinScene()
+{
+	winScene = Scene::create();
+
+	Label *lbWin = Label::createWithTTF("U WIN!", LABEL_FONTNAME, 3 * LABEL_FONTSIZE);
+	Vec2 pos = Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 + 60);
+	lbWin->setPosition(pos);
+	winScene->addChild(lbWin);
+
+	auto replayItem = MenuItemImage::create("replayNormal.png", "replayNormal.png", CC_CALLBACK_1(HelloWorld::menuReplayCallback, this));
+	replayItem->setPosition(Vec2(pos.x, pos.y - lbWin->getContentSize().height - 10));
+
+	auto menu = Menu::create(replayItem, NULL);
+	menu->setPosition(Vec2::ZERO);
+	winScene->addChild(menu, 1);
 }

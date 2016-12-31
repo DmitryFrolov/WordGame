@@ -13,7 +13,7 @@ using namespace CocosDenshion;
 #define LABEL_FONTNAME			"fonts/Marker Felt.ttf"
 #define LABEL_FONTSIZE			24
 #define SCORE_LABEL_FONTSIZE	15
-#define SCORE_STEP				10
+#define SCORE_STEP				100
 
 class HelloWorld : public cocos2d::Layer
 {
@@ -33,6 +33,7 @@ private:
 	WordTask						 task;
 
 	Scene						*endScene;
+	Scene						*winScene;
 	SimpleAudioEngine			   *audio;
 	void			 updateTask(float dt);
 	void					initPosMove();
@@ -56,6 +57,9 @@ public:
 	void createBackground();
 	void addBackgroundAudio(); 
 	void widthdrawHealth();
+	/*win scene*/
+	void showWin(float dt);
+	void createWinScene();
 	CREATE_FUNC(HelloWorld);
 };
 
