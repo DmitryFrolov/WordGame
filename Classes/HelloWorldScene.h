@@ -7,15 +7,18 @@
 #include "SimpleAudioEngine.h"
 #include "Classes\WordTask.h"
 #include "Classes\TaskManager.h"
+#include "Classes\Leaderboard.h"
 using namespace cocos2d;
 using namespace CocosDenshion;
+
 #define BACKGROUND_NAME			"background.jpg"
 #define LABEL_FONTNAME			"fonts/Marker Felt.ttf"
 #define LABEL_FONTSIZE			24
 #define SCORE_LABEL_FONTSIZE	15
-#define SCORE_STEP				100
+#define SCORE_STEP				10
+#define WIN_SCORE				200
 
-class HelloWorld : public cocos2d::Layer
+class HelloWorld: public cocos2d::Layer
 {
 private:
 	TaskManager						   tm;
@@ -35,9 +38,12 @@ private:
 	Scene						*endScene;
 	Scene						*winScene;
 	SimpleAudioEngine			   *audio;
+	Leaderboard				 *leaderboard;
+
 	void			 updateTask(float dt);
 	void					initPosMove();
 public:
+	
 	static cocos2d::Scene* createScene();
 	virtual bool init();
 	void MoveObject(Sprite *obj, Vec2 moveto, Vec2 scaleby);

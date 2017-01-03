@@ -1,6 +1,6 @@
 #ifndef _TASK_GENERATOR_
 #define _TASK_GENERATOR_
-#define _CRT_SECURE_NO_WARNINGS
+
 #include <iostream>
 #include <fstream>
 #include <string>

@@ -16,6 +16,8 @@ bool HelloWorld::init()
 	}
 	visibleSize = Director::getInstance()->getVisibleSize();
 	origin = Director::getInstance()->getVisibleOrigin();
+	leaderboard = new Leaderboard();
+
 	newGame();
 	addBackgroundAudio();
 	auto closeItem = MenuItemImage::create("CloseNormal.png", "CloseSelected.png", CC_CALLBACK_1(HelloWorld::menuCloseCallback, this));
@@ -156,7 +158,7 @@ void HelloWorld::initPosMove()
 void HelloWorld::addScore(int s)
 {
 	setScore(score + s);
-	if (score >= 200)
+	if (score >= WIN_SCORE)
 	{
 		scheduleOnce(schedule_selector(HelloWorld::showWin), 0);
 	}
@@ -171,6 +173,13 @@ void HelloWorld::setScore(int s)
 void HelloWorld::createEndScene()
 {
 	endScene = Scene::create();
+
+	Label *maxScoreLabel = Label::createWithTTF("Max score:", LABEL_FONTNAME, LABEL_FONTSIZE);
+	maxScoreLabel->setPosition(Vec2(origin.x + visibleSize.width * 9 / 10, origin.y + visibleSize.height * 9.3 / 10));
+	Label *maxScorePtsLabel = Label::createWithTTF(leaderboard->getMaxScore(), LABEL_FONTNAME, LABEL_FONTSIZE);
+	maxScorePtsLabel->setPosition(Vec2(origin.x + visibleSize.width * 9 / 10 + maxScoreLabel->getContentSize().width, origin.y + visibleSize.height * 9.3 / 10));
+ 	endScene->addChild(maxScoreLabel);
+	endScene->addChild(maxScorePtsLabel);
 
 	Label *lbEnd = Label::createWithTTF("End", LABEL_FONTNAME, 3 * LABEL_FONTSIZE);
 	Vec2 pos = Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 + 60);
@@ -187,6 +196,7 @@ void HelloWorld::createEndScene()
 
 void HelloWorld::showEnd(float dt)
 {
+	leaderboard->checkScore(score);
 	createEndScene();
 	Director::getInstance()->pushScene(endScene);
 	newGame();
@@ -201,7 +211,7 @@ void HelloWorld::menuReplayCallback(cocos2d::Ref* pSender) //call game scene
 		icons[i]->setOpacity(255);
 }
 
-void HelloWorld::newGame()
+void HelloWorld::newGame()  
 {
 	numOfHealth = maxHealth;
 }
@@ -227,7 +237,9 @@ void HelloWorld::widthdrawHealth()
 }
 
 //Win Scene things
-void HelloWorld::showWin(float dt) {
+void HelloWorld::showWin(float dt) 
+{
+	leaderboard->checkScore(score);
 	createWinScene();
 	Director::getInstance()->pushScene(winScene);
 	newGame();
@@ -236,6 +248,13 @@ void HelloWorld::showWin(float dt) {
 void HelloWorld::createWinScene()
 {
 	winScene = Scene::create();
+	
+	Label *maxScoreLabel = Label::createWithTTF("Max score:", LABEL_FONTNAME, LABEL_FONTSIZE);
+	maxScoreLabel->setPosition(Vec2(origin.x + visibleSize.width * 9 / 10, origin.y + visibleSize.height * 9.3 / 10));
+	Label *maxScorePtsLabel = Label::createWithTTF(leaderboard->getMaxScore(), LABEL_FONTNAME, LABEL_FONTSIZE);
+	maxScorePtsLabel->setPosition(Vec2(origin.x + visibleSize.width * 9 / 10 + maxScoreLabel->getContentSize().width, origin.y + visibleSize.height * 9.3 / 10));
+	winScene->addChild(maxScoreLabel);
+	winScene->addChild(maxScorePtsLabel);
 
 	Label *lbWin = Label::createWithTTF("U WIN!", LABEL_FONTNAME, 3 * LABEL_FONTSIZE);
 	Vec2 pos = Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2 + 60);
